@@ -1,6 +1,6 @@
 # 🌟 Fashion Assistant
 
-Welcome to your fashion assistant! File structure:
+Welcome to your fashion assistant! [Short Demo Video](https://www.loom.com/share/ac3decb62e654ce5961ea6f3ead59343?sid=90684ee0-52ff-4e9a-b92f-a5d025ad9a5a).
 
 1. `frontend` - lightweight frontend built using React + Tailwind
 2. `api` - microservice with FastAPI + SQLAlchemy
