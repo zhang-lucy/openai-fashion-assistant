@@ -38,15 +38,13 @@ python -m app.seed
 python -m app.upsert_embeddings
 ```
 
-Now, start the server
+Now, start the server:
 
 ```
 python -m uvicorn app.main:app --reload
 ```
 
 ## API Docs
-
-![architecture diagram](backend_architecture.png)
 
 ### POST `/products/search`
 
@@ -99,3 +97,21 @@ The API returns a list of Product objects, as well as a `similarity` score. Sche
   "embedding": <length 512 vector>
 }
 ```
+
+## How it works
+
+![architecture diagram](backend_architecture.png)
+
+Flow of the request:
+
+- [Query parsing](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/parse_query.py): The natural language query is parsed into a JSON blob of `category` and `tags`, where category represents broader fashion categories like "dress", "shirts", etc. while tags are other miscellaneous styles such as "casual", "denim".
+- [Query Formatting](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L95) The enhanced query is parsed into standard format for embedding
+- [Embedding](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/clip_embedder.py#L26) We use CLIP to match the embeddings, which match the format of our DB embeddings
+- [Embedding Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L120) Retrieves embeddings using ANN search
+- [Text Match Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L134)
+- [De-dupe and Merge](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L153)
+- [Re-rank](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L173C9-L173C25)
+
+## Data Pipeline
+
+![data pipeline diagram](data_pipeline.png)

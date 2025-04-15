@@ -31,7 +31,6 @@ def postprocess(items: List[str], disallow_prefix: str = "") -> List[str]:
 
 def parse_query(query: str) -> Dict[str, List[str]]:
     prompt = FASHION_QUERY_PROMPT.replace("{query}", query)
-    # print("PROMPT:\n", prompt)
 
     response = client.chat.completions.create(
         model="gpt-4-0125-preview",  # or your version
@@ -40,8 +39,6 @@ def parse_query(query: str) -> Dict[str, List[str]]:
     )
 
     content = response.choices[0].message.content
-    # print("RESPONSE:\n", content)
-
     category_match = re.search(r"Category:\s*(.+)", content, re.IGNORECASE)
     tags_match = re.search(r"Tags:\s*(.+)", content, re.IGNORECASE)
 

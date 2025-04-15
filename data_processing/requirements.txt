@@ -1,0 +1,7 @@
+transformers
+pandas
+torch
+torchvision
+torchaudio
+ipykernel
+ipywidgets
