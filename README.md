@@ -102,9 +102,9 @@ Flow of the request:
 - [Query parsing](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/parse_query.py): The natural language query is parsed into a JSON blob of `category` and `tags`, where category represents broader fashion categories like "dress", "shirts", etc. while tags are other miscellaneous styles such as "casual", "denim". Prompt engineering + iteration in [this notebook](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/query_parsing.ipynb).
 - [Bonus: Personalization](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L71-L93): The client can optionally pass in a JSON blob with user preferences, that are used to enhance the input query in the event that these tags cannot be extracted.
 - [Query Formatting](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L95): The enhanced query is parsed into standard format for embedding
-- [Embedding](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/clip_embedder.py#L26): We use CLIP to match the embeddings, which match the format of our DB embeddings
-- [Embedding Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L120): Retrieves embeddings using ANN search
-- [Text Match Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L134): Match titles
+- [Embedding](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/clip_embedder.py#L26): We use CLIP to create the embeddings.
+- [Embedding Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L120): Retrieves embeddings using ANN search.
+- [Text Match Retrieval](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L134): Match titles using trigram match.
 - [De-dupe and Merge](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L153): Combine similarity scores for items retrieved in both, and deduplicate results.
 - [Re-rank](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L173C9-L173C25): Items were re-ranked - for example, results with more+higher rankings were boosted. Re-ranking rules/logic [here](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/search.py#L6-L25).
 
@@ -112,7 +112,7 @@ Flow of the request:
 
 ![data pipeline diagram](data_pipeline.png)
 
-- [Token Classifier](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/parse_titles.ipynb): First I batch processed and grabbed all the unique tokens from all the text + descriptions + features. I passed the top 2000 of them into gpt-4o-mini and had it classify them by gender / category / color / style. I was then able to apply these hardcoded mappings to be scrappy classifier that extracted tokens and classified by gender / category / color / style.
+- [Token Classifier](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/parse_titles.ipynb): First I batch processed and grabbed all the unique tokens from all the text + descriptions + features. I passed the top 2000 of them into gpt-4o-mini and had it classify them by gender / category / color / style. I was then able to apply these hardcoded mappings to be scrappy classifier that extracted tokens and classified them.
 - [Format Text For Embedding](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/parse_titles.ipynb): In the same notebook, about 75% down the page, see the function `format_product` that provides the `text_for_embedding` column. This function formats the text in a standard way, ready to be embedded
 - [Create Product Schema](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/models.py): This product schema was created for a postgres table with a pgvector-backed Embedding column
 - [Insert Metadata into table](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/api/app/scripts/upsert.py): First, all the Products were inserted into the metadata table.
@@ -123,12 +123,16 @@ Flow of the request:
 - Initial data explorations [notebook](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/exploration.ipynb) to determine primary keys (title + ASIN), sparsity of price data, etc.
 - Played with some [image captioning](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/images.ipynb) models to experiment with extracting insights from images. Also experimented with FashionCLIP, but decided that the text data was sufficient for this use case.
 - [Script to convert JSONL to JSON](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/convert_to_json.py)
+- [Script to caption images](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/caption_images.py) - ultimately rejected due to caption quality.
+- [Script to take a sample of data](https://github.com/zhang-lucy/openai-fashion-assistant/blob/main/data_processing/take_sample.py) for a smaller version of data more easily workable.
 
-## Next Steps
+## Next Steps / Improvements
 
 - Fuzzy matching on token classifier in data pipeline
 - Image embeddings
 - More standard text embeddings
 - Separate embeddings table
+- Dedicated endpoint for CLIP to improve performance
+- Caching
 - Run both retrieval methods in parallel (text + embeddings) to improve performance
 - Collect user behavior data to be able to train a model to do proper retrieval
