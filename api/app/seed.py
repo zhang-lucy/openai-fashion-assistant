@@ -8,13 +8,7 @@ from dotenv import load_dotenv
 
 from transformers import AutoTokenizer, AutoModel
 import torch
-
 load_dotenv()
-
-# Load the FashionCLIP model (text embedding part)
-tokenizer = AutoTokenizer.from_pretrained("patrickjohncyh/fashion-clip")
-model = AutoModel.from_pretrained("patrickjohncyh/fashion-clip")
-
 
 def load_products(db: Session):
     # Delete all existing products
@@ -29,15 +23,6 @@ def load_products(db: Session):
         if i % 10 == 0:
             print(f"inserted {i} products")
         item = data[i]
-        title = item["title"]
-        description = " ".join(item.get("description", []))
-        full_text = f"{title}. {description}"
-        full_text = f"{title}. {description}"
-        try:
-            embedding = embed_text(full_text)
-        except Exception as e:
-            print(f"Failed to embed: {full_text}\n{e}")
-            embedding = None
 
         image_urls = [
             img.get("hi_res") or img.get("large")
@@ -53,7 +38,6 @@ def load_products(db: Session):
             average_rating=item.get("average_rating"),
             rating_number=item.get("rating_number"),
             store=item.get("main_category"),
-            embedding=embedding,
         )
         db.add(product)
     db.commit()
